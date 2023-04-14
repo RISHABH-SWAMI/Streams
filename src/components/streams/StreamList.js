@@ -1,0 +1,88 @@
+import React from "react";
+import { Link } from "react-router-dom";
+import { connect } from "react-redux";
+import { fetchStreams } from "../../actions";
+
+class StreamList extends React.Component {
+  componentDidMount() {
+    this.props.fetchStreams();
+  }
+
+  // For Edit and Delete buttons on stream that is associated with userId
+  renderAdmin(stream) {
+    console.log(stream);
+
+    if (stream.userId === this.props.currentUserId) {
+      return (
+        <div className="right floated content">
+          <Link to={`/streams/edit/${stream.id}`} className="ui button primary">
+            Edit
+          </Link>
+          <Link
+            to={`/streams/delete/${stream.id}`}
+            className="ui button negative"
+          >
+            Delete
+          </Link>
+        </div>
+      );
+    }
+  }
+
+
+
+  renderList = () => {
+    return this.props.streams.map((stream) => {
+      if(this.props.currentUserId !== stream.userId) {
+        return null;
+      }
+      return (
+        <div className="item" key={stream.id}>
+          {this.renderAdmin(stream)}
+          <i className="large middle aligned icon camera" />
+          <div className="content">
+            <Link to={`/streams/${stream.id}`} className="header">
+              {stream.title}
+            </Link>
+            <div className="description">{stream.description}</div>
+          </div>
+        </div>
+      );
+    });
+  };
+
+  renderCreate() {
+    return (
+      <div style={{ textAlign: "right" }}>
+        <Link to="/streams/new" className="ui button primary">
+          Create Stream
+        </Link>
+      </div>
+    );
+  }
+
+  render() {
+    console.log(this.props.streams);
+    return (
+      <div>
+        <h2>Streams</h2>
+        <div className="ui celled list">{this.renderList()}</div>
+        {this.renderCreate()}
+      </div>
+    );
+  }
+}
+// <Link to="/streams/detail">Navigate to Stream Details.</Link>
+
+const mapStateToProps = (state) => {
+  // Object.values is a built-in javascript function, It's going to take an object as an arguement.
+  // All of the different values inside of that streams object are going to pe pulled out and then inserted into an array.
+  // So that's exactly what Object.value does it just turns all the values inside that object into an array.
+  return {
+    streams: Object.values(state.streams),
+    currentUserId: state.auth.userId,
+    isSignedIn: state.auth.isSignedIn,
+  };
+};
+
+export default connect(mapStateToProps, { fetchStreams })(StreamList);
